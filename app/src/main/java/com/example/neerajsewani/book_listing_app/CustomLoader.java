@@ -13,16 +13,18 @@ public class CustomLoader extends AsyncTaskLoader<String> {
 
     private String query;
     private String minResults;
-    CustomLoader(Context context, String query, String minResults){
+    private String orderByValue;
+    CustomLoader(Context context, String query, String minResults, String orderByValue){
         super(context);
         this.query = query;
         this.minResults = minResults;
+        this.orderByValue = orderByValue;
 
     }
     @Nullable
     @Override
     public String loadInBackground() {
-        return Utils.getInfo(query, minResults);
+        return Utils.getInfo(query, minResults, orderByValue);
     }
 
     @Override

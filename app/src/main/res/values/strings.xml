@@ -7,4 +7,14 @@
     <string name="settings_default_result_label">Maximum Result Count</string>
     <string name="settings_default_result_key" translatable="false">maxResults</string>
     <string name="settings_default_value_of_result" translatable="false">1</string>
+    
+    <string name="settings_order_by_label">Order By</string>
+    <string name="settings_order_by_key">order_by</string>
+    <string name="settings_order_by_default">@string/settings_order_by_relevance_value</string>
+    
+    <string name="settings_order_by_relevance_label">Most Relevant</string>
+    <string name="settings_order_by_relevance_value">relevance</string>
+
+    <string name="settings_order_by_newest_label">Newest</string>
+    <string name="settings_order_by_newest_value">newest</string>
 </resources>

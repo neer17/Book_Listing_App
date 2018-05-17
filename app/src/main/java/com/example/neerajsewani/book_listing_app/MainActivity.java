@@ -117,13 +117,22 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public android.support.v4.content.Loader onCreateLoader(int id, @Nullable Bundle args) {
         //  getting the SharedPreference which contains all the values of the Preference
-        //
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String maxResults = sharedPreferences.getString(getString(R.string.settings_default_result_key),
+
+        //  SharedPreference for maxResults
+        SharedPreferences maxResultsSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String maxResults = maxResultsSharedPreferences.getString(getString(R.string.settings_default_result_key),
                 getString(R.string.settings_default_value_of_result));
 
+        //  SharedPreference for OrderBy
+        SharedPreferences orderBySharedPrference = PreferenceManager
+        .getDefaultSharedPreferences(this);
+
+        String orderByValue = orderBySharedPrference.getString(getString(R.string.settings_order_by_key),
+                getString(R.string.settings_order_by_default));
+
+
         //  passing the minResults with query
-        return new CustomLoader(this, args.getString("queryString"), maxResults);
+        return new CustomLoader(this, args.getString("queryString"), maxResults, orderByValue);
     }
 
 

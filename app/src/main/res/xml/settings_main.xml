@@ -3,6 +3,13 @@
     android:title="@string/settings_title"
     >
 
+    <ListPreference
+        android:defaultValue="@string/settings_order_by_default"
+        android:key="@string/settings_order_by_key"
+        android:title="@string/settings_order_by_label"
+        android:entries="@array/settings_order_by_labels"
+        android:entryValues="@array/settings_order_by_values"
+        />
     <EditTextPreference
         android:defaultValue="@string/settings_default_value_of_result"
         android:key="@string/settings_default_result_key"
@@ -10,5 +17,7 @@
         android:selectAllOnFocus="true"
         android:title="@string/settings_default_result_label"
         />
+
+
 
 </PreferenceScreen>

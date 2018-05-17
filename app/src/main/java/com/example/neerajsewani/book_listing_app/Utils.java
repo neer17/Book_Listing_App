@@ -21,15 +21,14 @@ public class Utils {
     private static final String QUERY_PARAM = "q";   //  params for search string
     private static final String MAX_RESULT = "maxResults";   //  param for max results
     private static final String PRINT_TYPE = "printType";    //  param for printType
-    private static final String MIN_RESULTS = "minResults"; //  param for min results
+    private static final String ORDER_BY = "orderBy";   //  param for orderBy
 
 
     //  When we pass the quey it will return the json response
-    static String getInfo(String queryString, String minResults){
+    static String getInfo(String queryString, String minResults, String orderByValue){
         HttpURLConnection connection = null;
         String jsonString = null;
         InputStream inputStream = null;
-        URI aUri = null;
             try{
             //  Building our Uri
             Uri builtUri = Uri.parse(BASE_URL)
@@ -37,9 +36,8 @@ public class Utils {
                     .appendQueryParameter(QUERY_PARAM, queryString)
                     .appendQueryParameter(MAX_RESULT, minResults)
                     .appendQueryParameter(PRINT_TYPE, "books")
+                  //  .appendQueryParameter(ORDER_BY, orderByValue)
                     .build();
-
-                Log.d(TAG, "getInfo: value of minResults "+minResults);
 
             URL requestURL = new URL(builtUri.toString());
 
