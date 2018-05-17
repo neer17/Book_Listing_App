@@ -4,7 +4,7 @@
     <string name="settings_menu_item">Settings</string>
     <string name="settings_title">Earthquake Settings</string>
     
-    <string name="settings_default_result_label">Minimum Result Count</string>
-    <string name="settings_default_result_key" translatable="false">minResults</string>
+    <string name="settings_default_result_label">Maximum Result Count</string>
+    <string name="settings_default_result_key" translatable="false">maxResults</string>
     <string name="settings_default_value_of_result" translatable="false">1</string>
 </resources>
