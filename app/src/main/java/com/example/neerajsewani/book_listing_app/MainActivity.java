@@ -17,8 +17,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.LoaderManager;
@@ -33,12 +35,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final String BASE_URL = "https://www.googleapis.com/books/v1/volumes?";
 
     EditText titleTextView;
-    TextView resultTextView;
     Button searchButton;
+    ListView listView;
+
 
     String query = "";
     private ArrayList<String> authorsList = new ArrayList<>();
+    private ArrayList<BooksDetails> booksDetails = new ArrayList<>();
     private String title = null, id = null;
+
+    private CustomAdapter adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +54,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         titleTextView = findViewById(R.id.author_textView);
         searchButton = findViewById(R.id.search);
-        resultTextView = findViewById(R.id.result_textView);
+        listView = findViewById(R.id.list_view);
+
+        /**
+         * this declaration is needed
+         */
+          adapter = new CustomAdapter(this, new ArrayList<BooksDetails>());
+
+         ListView listView = findViewById(R.id.list_view_in_main_layout);
+
+         listView.setAdapter(adapter);
 
         /**
          *  initLoader ensures a loader is initialized and active
@@ -56,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if(getSupportLoaderManager().getLoader(0) != null)
             getSupportLoaderManager().initLoader(0, null, this);
 
+        //  Search button
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                         /**
                          *  starting a loader here
                          *  restartLoader method starts/restarts a loader and register the callbacks to it
-                         *  when we rotate the device a new activity is created an restartLoader starts a new loader
+                         *  when we rotate the device a new activity is created and restartLoader starts a new loader
                          *  thats why data is lost on rotation
                          *  */
                         Bundle bundle = new Bundle();
@@ -88,13 +105,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 }
                 else
                     Toast.makeText(MainActivity.this, "Connect to a network first", Toast.LENGTH_SHORT).show();
-                
-
             }
         });
-
-
-
     }
 
     private void closeKeyboard(){
@@ -169,17 +181,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     Log.d(TAG, "onPostExecute: Author name is "+authorsList.get(i));
                 }
 
-                //  displaying the results
-                resultTextView.append("\n"+" Title is -> "+title+"\n"+"Author's name is -> "+authorsList.get(0)+"\n"+"Book id is -> "+id);
-
                 if(title == null) {
                     //  if no title matches
                     titleTextView.setText("No title matches");
-                    resultTextView.setText("No result matches");
                 }
+
+                //   adding details in the ArrayList bookDetails
+                booksDetails.add(new BooksDetails(id, title, authorsList.get(0)));
             }
 
-
+            //  using ListView with custom adapter to display the results
+            if(!adapter.isEmpty())
+                adapter.clear();
+            else {
+                adapter.addAll(booksDetails);
+            }
         }
         catch(Exception e){
             Log.e(TAG, "onPostExecute: exception in json parsing", e);
@@ -188,7 +204,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(@NonNull android.support.v4.content.Loader loader) {
-
+        //  clearing data from adapter while resetting the loader
+        adapter.clear();
     }
 
     @Override
@@ -204,5 +221,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    //  helper method to clear contents of adapter
+    private void clearAdapter(CustomAdapter adapter){
+        if(adapter != null)
+            adapter.clear();
     }
 }

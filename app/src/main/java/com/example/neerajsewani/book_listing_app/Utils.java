@@ -25,7 +25,7 @@ public class Utils {
 
 
     //  When we pass the quey it will return the json response
-    static String getInfo(String queryString, String minResults, String orderByValue){
+    static String getInfo(String queryString, String maxResults, String orderByValue){
         HttpURLConnection connection = null;
         String jsonString = null;
         InputStream inputStream = null;
@@ -34,9 +34,9 @@ public class Utils {
             Uri builtUri = Uri.parse(BASE_URL)
                     .buildUpon()
                     .appendQueryParameter(QUERY_PARAM, queryString)
-                    .appendQueryParameter(MAX_RESULT, minResults)
+                    .appendQueryParameter(MAX_RESULT, maxResults)
                     .appendQueryParameter(PRINT_TYPE, "books")
-                  //  .appendQueryParameter(ORDER_BY, orderByValue)
+                    .appendQueryParameter(ORDER_BY, orderByValue)
                     .build();
 
             URL requestURL = new URL(builtUri.toString());

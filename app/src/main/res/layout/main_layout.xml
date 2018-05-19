@@ -12,16 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Enter Author's name"
+        android:hint="Enter a keyword"
         android:inputType="textPersonName" />
 
     <Button
         android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         android:text="Search" />
 
     <ListView
+        android:id="@+id/list_view_in_main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

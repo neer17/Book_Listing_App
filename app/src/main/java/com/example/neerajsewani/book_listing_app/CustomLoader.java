@@ -12,19 +12,21 @@ import android.support.v4.content.AsyncTaskLoader;
 public class CustomLoader extends AsyncTaskLoader<String> {
 
     private String query;
-    private String minResults;
+    private String maxResults;
     private String orderByValue;
+
     CustomLoader(Context context, String query, String minResults, String orderByValue){
         super(context);
         this.query = query;
-        this.minResults = minResults;
+        this.maxResults = minResults;
         this.orderByValue = orderByValue;
 
     }
     @Nullable
     @Override
     public String loadInBackground() {
-        return Utils.getInfo(query, minResults, orderByValue);
+
+        return Utils.getInfo(query, maxResults, orderByValue);
     }
 
     @Override
@@ -33,4 +35,6 @@ public class CustomLoader extends AsyncTaskLoader<String> {
 
         forceLoad();
     }
+
+
 }
