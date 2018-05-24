@@ -30,9 +30,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>{
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>, SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String TAG = "MainActivity";
-    private static final String BASE_URL = "https://www.googleapis.com/books/v1/volumes?";
+    
+    private static final int LOADER_INIT_KEY = 0;
 
     EditText titleTextView;
     Button searchButton;
@@ -59,18 +60,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         /**
          * this declaration is needed
          */
-          adapter = new CustomAdapter(this, new ArrayList<BooksDetails>());
+         adapter = new CustomAdapter(this, new ArrayList<BooksDetails>());
 
-         ListView listView = findViewById(R.id.list_view_in_main_layout);
+         final ListView listView = findViewById(R.id.list_view_in_main_layout);
 
          listView.setAdapter(adapter);
 
-        /**
-         *  initLoader ensures a loader is initialized and active
-         *  same loader will be active when device is rotated
-         */
-        if(getSupportLoaderManager().getLoader(0) != null)
-            getSupportLoaderManager().initLoader(0, null, this);
+         // getting instance of SharedPreference and attaching listener to it
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //  any change in the SharedPreference will get notified
+        //  if user tweaks any settings
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
         //  Search button
         searchButton.setOnClickListener(new View.OnClickListener() {
@@ -79,7 +79,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 //  getting value from textView
                 query = titleTextView.getText().toString();
+
                 Log.d(TAG, "onClick: "+query);
+
+                //  clearing the adapter
+                adapter.clear();
 
                 //  checking the network connection
                 ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
@@ -94,17 +98,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                          *  when we rotate the device a new activity is created and restartLoader starts a new loader
                          *  thats why data is lost on rotation
                          *  */
-                        Bundle bundle = new Bundle();
-                        bundle.putString("queryString", query);
 
-                        getSupportLoaderManager().restartLoader(0, bundle, MainActivity.this);
+                        getSupportLoaderManager().initLoader(LOADER_INIT_KEY, null, MainActivity.this);
                         closeKeyboard();
+                        Log.d(TAG, "onClick: ");
                     }
                     else
                         Toast.makeText(MainActivity.this, "Enter a title", Toast.LENGTH_SHORT).show();
                 }
-                else
-                    Toast.makeText(MainActivity.this, "Connect to a network first", Toast.LENGTH_SHORT).show();
+                else{
+                    Toast.makeText(MainActivity.this, "Not connected to internet", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
     }
@@ -128,6 +133,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @NonNull
     @Override
     public android.support.v4.content.Loader onCreateLoader(int id, @Nullable Bundle args) {
+
+        Log.d(TAG, "onCreateLoader: ");
         //  getting the SharedPreference which contains all the values of the Preference
 
         //  SharedPreference for maxResults
@@ -136,21 +143,22 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 getString(R.string.settings_default_value_of_result));
 
         //  SharedPreference for OrderBy
-        SharedPreferences orderBySharedPrference = PreferenceManager
+        SharedPreferences orderBySharedPreference = PreferenceManager
         .getDefaultSharedPreferences(this);
 
-        String orderByValue = orderBySharedPrference.getString(getString(R.string.settings_order_by_key),
+        String orderByValue = orderBySharedPreference.getString(getString(R.string.settings_order_by_key),
                 getString(R.string.settings_order_by_default));
 
 
         //  passing the minResults with query
-        return new CustomLoader(this, args.getString("queryString"), maxResults, orderByValue);
+        return new CustomLoader(this, query, maxResults, orderByValue);
     }
 
 
     @Override
     public void onLoadFinished(@NonNull android.support.v4.content.Loader loader, String s) {
-
+        Log.d(TAG, "onLoadFinished: ");
+        
         //  after getting the raw json we are parsing it here
         try {
             JSONObject rootObject = new JSONObject(s);
@@ -162,15 +170,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 //  getting book id
                 id = booksInfo.getString("id");
-                Log.d(TAG, "onPostExecute: ID of the book "+id);
 
                 //  getting the volumeInfo object
                 JSONObject volumeInfo = booksInfo.getJSONObject("volumeInfo");
 
                 //  getting title of the book
                 title = volumeInfo.getString("title");
-                Log.d(TAG, "onPostExecute: Title of the book "+title);
-
                 //  getting the author
 
                 JSONArray author = volumeInfo.getJSONArray("authors");
@@ -178,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 //  getting all the members of author array
                 for(int j = 0;j < author.length();j++){
                     authorsList.add(author.getString(j));
-                    Log.d(TAG, "onPostExecute: Author name is "+authorsList.get(i));
                 }
 
                 if(title == null) {
@@ -188,24 +192,19 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 //   adding details in the ArrayList bookDetails
                 booksDetails.add(new BooksDetails(id, title, authorsList.get(0)));
+
             }
 
-            //  using ListView with custom adapter to display the results
-            if(!adapter.isEmpty())
-                adapter.clear();
-            else {
-                adapter.addAll(booksDetails);
-            }
+            adapter.addAll(booksDetails);
         }
         catch(Exception e){
-            Log.e(TAG, "onPostExecute: exception in json parsing", e);
+            Log.e(TAG, "onLoadFinished: exception in json parsing", e);
         }
     }
 
     @Override
     public void onLoaderReset(@NonNull android.support.v4.content.Loader loader) {
-        //  clearing data from adapter while resetting the loader
-        adapter.clear();
+        Log.d(TAG, "onLoaderReset: ");
     }
 
     @Override
@@ -223,9 +222,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return super.onOptionsItemSelected(item);
     }
 
-    //  helper method to clear contents of adapter
-    private void clearAdapter(CustomAdapter adapter){
-        if(adapter != null)
-            adapter.clear();
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.d(TAG, "onSharedPreferenceChanged: ");
+
+        if(key.equals(getString(R.string.settings_order_by_key)) || key.equals(getString(R.string.settings_default_result_key))){
+
+            getSupportLoaderManager().restartLoader(LOADER_INIT_KEY, null, this);
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        adapter.clear();
     }
 }

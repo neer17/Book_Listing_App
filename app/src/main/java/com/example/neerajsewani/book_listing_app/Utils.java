@@ -26,6 +26,8 @@ public class Utils {
 
     //  When we pass the quey it will return the json response
     static String getInfo(String queryString, String maxResults, String orderByValue){
+        Log.d(TAG, "getInfo: ");
+
         HttpURLConnection connection = null;
         String jsonString = null;
         InputStream inputStream = null;

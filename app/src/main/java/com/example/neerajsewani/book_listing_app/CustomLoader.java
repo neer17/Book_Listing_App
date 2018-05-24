@@ -3,6 +3,7 @@ package com.example.neerajsewani.book_listing_app;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
+import android.util.Log;
 
 /**
  * @param "AsyncTaskLoader" takes a parameter to operate upon
@@ -10,6 +11,7 @@ import android.support.v4.content.AsyncTaskLoader;
  *                        from the loadInBackground method
  */
 public class CustomLoader extends AsyncTaskLoader<String> {
+    private static final String TAG = "CustomLoader";
 
     private String query;
     private String maxResults;
@@ -25,6 +27,7 @@ public class CustomLoader extends AsyncTaskLoader<String> {
     @Nullable
     @Override
     public String loadInBackground() {
+        Log.d(TAG, "loadInBackground: ");
 
         return Utils.getInfo(query, maxResults, orderByValue);
     }
